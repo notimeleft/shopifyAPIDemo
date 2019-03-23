@@ -6,7 +6,7 @@
 //  Copyright © 2019 Jerry Wang. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 //structs of the dictionary values we expect to receive from JSON responses
 
@@ -20,9 +20,9 @@ struct MainCollectionResponse:Codable{
         let title:String
         let body_html:String
         let id:Int
-        let image:ImageLink
+        let image:Image
         
-        struct ImageLink:Codable{
+        struct Image:Codable{
             let src:String
         }
     }

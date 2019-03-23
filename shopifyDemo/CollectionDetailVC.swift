@@ -12,10 +12,13 @@ class CollectionDetailVC: UITableViewController {
     var productItems:[ProductResponse.Product]?
 
     var collectionItem: MainCollectionResponse.CollectionItem!
+    var collectionImage: UIImage?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        requestPicture()
         requestDetail(collectionID: collectionItem.id)
+        
     }
     
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -42,7 +45,9 @@ class CollectionDetailVC: UITableViewController {
         
         if indexPath.section == 0{
             let cell = tableView.dequeueReusableCell(withIdentifier: "header", for: indexPath) as! ProfilePictureCell
-            cell.profilePictureView.image = UIImage(named: "1.jpg")
+            if let collectionImage = collectionImage{
+                cell.profilePictureView.image = collectionImage
+            }
             cell.descriptionLabel.text = collectionItem.body_html
             //cell.textLabel?.text = collectionItem.title
             return cell

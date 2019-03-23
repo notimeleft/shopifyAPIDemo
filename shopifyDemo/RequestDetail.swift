@@ -10,10 +10,34 @@ import UIKit
 
 extension CollectionDetailVC{
     
-    func requestDetail(collectionID:Int){
-        
+    func requestPicture(){
+        guard let url = URL(string:collectionItem.image.src) else { return }
         let session = URLSession.shared
-        let url = URL(string: "https://shopicruit.myshopify.com/admin/collects.json?collection_id=\(collectionID)&page=1&access_token=c32313df0d0ef512ca64d5b336a0d7c6")!
+        
+        let task = session.dataTask(with: url){
+            [weak self](data,response,error) in
+            guard let responseCode = (response as? HTTPURLResponse)?.statusCode else { return }
+            if responseCode < 200 || responseCode > 200 {
+                print("invalid http status \(responseCode)")
+                return
+            }
+            if let data = data {
+                self?.collectionImage = UIImage(data:data)
+                DispatchQueue.main.async{
+                    [weak self] in 
+                    self?.tableView.reloadData()
+                }
+            }
+            if let error = error {
+                print(error.localizedDescription)
+            }
+        }
+        task.resume()
+    }
+    
+    func requestDetail(collectionID:Int){
+        guard let url = URL(string: "https://shopicruit.myshopify.com/admin/collects.json?collection_id=\(collectionID)&page=1&access_token=c32313df0d0ef512ca64d5b336a0d7c6") else { return }
+        let session = URLSession.shared
         
         let task = session.dataTask(with: url){
             [weak self](data,response,error) in
@@ -42,10 +66,10 @@ extension CollectionDetailVC{
     }
     
     func requestProducts(productIDs:[Int]){
-        let session = URLSession.shared
         let ids = productIDs.map {String($0)}.joined(separator: ",")
+        guard let url = URL(string: "https://shopicruit.myshopify.com/admin/products.json?ids=\(ids)&page=1&access_token=c32313df0d0ef512ca64d5b336a0d7c6") else { return }
+        let session = URLSession.shared
         
-        let url = URL(string: "https://shopicruit.myshopify.com/admin/products.json?ids=\(ids)&page=1&access_token=c32313df0d0ef512ca64d5b336a0d7c6")!
         
         let task = session.dataTask(with: url){
             (data,response,error) in

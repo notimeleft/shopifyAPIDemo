@@ -9,7 +9,6 @@
 import UIKit
 
 class CustomCollectionsVC: UITableViewController{
-//    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     var mainCollection:MainCollectionResponse?
     var detailCollectionItem:MainCollectionResponse.CollectionItem?
     
@@ -17,8 +16,21 @@ class CustomCollectionsVC: UITableViewController{
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         navigationItem.title = "Custom Collections"
-        requestMainCollection()
+        loadCollectionTitles()
+    }
     
+    func loadCollectionTitles(){
+        if let url = URL(string:"https://shopicruit.myshopify.com/admin/custom_collections.json?page=1&access_token=c32313df0d0ef512ca64d5b336a0d7c6"){
+            basicNetworkRequest(url: url){
+                [unowned self] (data) in
+                let results = try JSONDecoder().decode(MainCollectionResponse.self, from: data)
+                self.mainCollection = results
+                DispatchQueue.main.async {
+                    [unowned self] in
+                    self.tableView.reloadData()
+                }
+            }
+        }
     }
     //preparation actions before transitioning to collection detail view
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

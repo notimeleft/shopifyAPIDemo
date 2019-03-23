@@ -16,10 +16,49 @@ class CollectionDetailVC: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        requestPicture()
-        requestDetail(collectionID: collectionItem.id)
+        loadPicture()
+        loadProductInfo()
         
     }
+    
+    func loadPicture(){
+        if let imageURL = URL(string:collectionItem.image.src){
+            basicNetworkRequest(url: imageURL){
+                [weak self] (data) in
+                self?.collectionImage = UIImage(data:data)
+                DispatchQueue.main.async{
+                    [weak self] in
+                    self?.tableView.reloadData()
+                }
+            }
+        }
+    }
+    
+    func loadProductInfo(){
+        if let infoURL = URL(string: "https://shopicruit.myshopify.com/admin/collects.json?collection_id=\(collectionItem.id)&page=1&access_token=c32313df0d0ef512ca64d5b336a0d7c6"){
+            basicNetworkRequest(url: infoURL){
+                [weak self] (data) in
+                let results = try JSONDecoder().decode(SingleCollectionResponse.self, from: data)
+                
+                let productIDs = results.collects.map {$0.product_id}
+                let idParam = productIDs.map {String($0)}.joined(separator: ",")
+                if let productURL = URL(string: "https://shopicruit.myshopify.com/admin/products.json?ids=\(idParam)&page=1&access_token=c32313df0d0ef512ca64d5b336a0d7c6"){
+                    self?.basicNetworkRequest(url: productURL){
+                        [weak self](data) in
+                        let products = try JSONDecoder().decode(ProductResponse.self, from: data)
+                        self?.productItems = products.products
+                        
+                        DispatchQueue.main.async{
+                            [weak self] in
+                            self?.tableView.reloadData()
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    
     
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 2
@@ -49,14 +88,13 @@ class CollectionDetailVC: UITableViewController {
                 cell.profilePictureView.image = collectionImage
             }
             cell.descriptionLabel.text = collectionItem.body_html
-            //cell.textLabel?.text = collectionItem.title
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "detail", for: indexPath)
             if let title = productItems?[indexPath.row].title, let count = productItems?[indexPath.row].quantity{
                 cell.textLabel?.text = String(title)
                 cell.detailTextLabel?.text = String(count)
-                //cell.imageView?.image = UIImage(named: "1.jpg")
+                
             } else {
                 cell.textLabel?.text = "Please wait, retrieving..."
             }

@@ -8,6 +8,7 @@
 
 import UIKit
 
+//custom profile cell: contains a profile picture and a description label
 class ProfilePictureCell: UITableViewCell {
     @IBOutlet weak var profilePictureView: UIImageView!
     @IBOutlet weak var descriptionLabel: UILabel!

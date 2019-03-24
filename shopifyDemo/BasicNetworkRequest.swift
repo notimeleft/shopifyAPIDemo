@@ -9,7 +9,8 @@
 import UIKit
 
 extension UIViewController{
-    func basicNetworkRequest(url:URL, dataHandler:@escaping(Data) throws ->Void){
+    //a basic network request that requests data from a URL and handles the data via a closure param. The data handler might fail, so it's labeled with 'throws'
+    func basicNetworkRequest(url:URL, dataHandler:@escaping(Data) throws -> Void){
         URLSession.shared.dataTask(with: url){
             (data,response,error) in
             guard let responseCode = (response as? HTTPURLResponse)?.statusCode else { return }

@@ -35,7 +35,8 @@ class CollectionDetailVC: UITableViewController {
                 self?.collectionImage = UIImage(data:data)
                 DispatchQueue.main.async{
                     [weak self] in
-                    self?.tableView.reloadData()
+                    let indexPath = IndexPath(row: 0, section: 0)
+                    self?.tableView.reloadRows(at: [indexPath], with: .automatic)
                 }
             }
         }
@@ -57,7 +58,8 @@ class CollectionDetailVC: UITableViewController {
                         self?.loadProductPictures()
                         DispatchQueue.main.async{
                             [weak self] in
-                            self?.tableView.reloadData()
+                            let indexSet = IndexSet(integer: 1)
+                            self?.tableView.reloadSections(indexSet, with: .automatic)
                         }
                     }
                 }
@@ -67,14 +69,16 @@ class CollectionDetailVC: UITableViewController {
     //easily the hardest part of this app. We have to make a network request for every single product's picture, and we have to be able to update the table whenever the image has been fetched. This means we must assign the image value to the correct 'product' object in the array, which means the Product data structure cannot be a struct. 
     func loadProductPictures(){
         guard let productItems = productItems else { return }
-        for product in productItems{
+        for (index,product) in productItems.enumerated(){
             if let imageLink = product.images.first?.src, let url = URL(string: imageLink){
                 basicNetworkRequest(url: url){
                     [weak self] (data) in
                     
                     product.firstImage = data
                     DispatchQueue.main.async{
-                        self?.tableView.reloadData()
+                        //self?.tableView.reloadData()
+                        let indexPath = IndexPath(row: index, section: 1)
+                        self?.tableView.reloadRows(at: [indexPath], with: .automatic)
                     }
                 }
             }

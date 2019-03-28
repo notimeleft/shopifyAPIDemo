@@ -10,9 +10,40 @@ import UIKit
 
 //The main screen of the application, which hosts a list of all the custom collections
 class CustomCollectionsVC: UITableViewController{
+    //class that handles receiving/returning data from a MainCollectionResponse
+    class DataSource {
+        var mainCollection:MainCollectionResponse
+        var detailCollectionIndex = 0
+        
+        var numberOfRowsInSection:Int{
+            return mainCollection.custom_collections.count
+        }
+        
+        var detailCollectionItem:MainCollectionResponse.CollectionItem{
+            return mainCollection.custom_collections[detailCollectionIndex]
+        }
+        
+        private var tableView:UITableView?
+        
+        init(mainCollection:MainCollectionResponse,tableView:UITableView){
+            self.mainCollection = mainCollection
+            self.tableView = tableView
+            populateData()
+        }
+        
+        private func populateData(){
+            DispatchQueue.main.async {
+                [unowned self] in
+                self.tableView?.reloadData()
+            }
+        }
+        
+        func getCollectionTitle(inIndex index:Int)->String{
+            return mainCollection.custom_collections[index].title
+        }
+    }
     
-    var mainCollection:MainCollectionResponse?
-    var detailCollectionItem:MainCollectionResponse.CollectionItem?
+    private var dataSource:DataSource?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,11 +58,7 @@ class CustomCollectionsVC: UITableViewController{
             basicNetworkRequest(url: url){
                 [unowned self] (data) in
                 let results = try JSONDecoder().decode(MainCollectionResponse.self, from: data)
-                self.mainCollection = results
-                DispatchQueue.main.async {
-                    [unowned self] in
-                    self.tableView.reloadData()
-                }
+                self.dataSource = DataSource(mainCollection: results, tableView: self.tableView)
             }
         }
     }
@@ -39,18 +66,18 @@ class CustomCollectionsVC: UITableViewController{
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showDetail"{
             let collectionsDetail = segue.destination as! CollectionDetailVC
-            collectionsDetail.collectionItem = detailCollectionItem
+            collectionsDetail.collectionItem = dataSource?.detailCollectionItem
         }
     }
     //tableview delegate method: define number of rows in each section
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return mainCollection?.custom_collections.count ?? 1
+        return dataSource?.numberOfRowsInSection ?? 1
     }
     //define cell content
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "main", for: indexPath)
-        if let mainCollection = mainCollection{
-            cell.textLabel?.text = mainCollection.custom_collections[indexPath.row].title
+        if let dataSource = dataSource{
+            cell.textLabel?.text = dataSource.getCollectionTitle(inIndex: indexPath.row)
         } else {
             cell.textLabel?.text = "please wait, retrieving..."
         }
@@ -58,8 +85,8 @@ class CustomCollectionsVC: UITableViewController{
     }
     //define what happens when user taps on a specific cell. In this case, we gather the selected collection item and perform a segue to the detail view controller
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if let collectionItem = mainCollection?.custom_collections[indexPath.row] {
-            detailCollectionItem = collectionItem
+        if let dataSource = dataSource{
+            dataSource.detailCollectionIndex = indexPath.row
             performSegue(withIdentifier: "showDetail", sender: self)
         }
     }

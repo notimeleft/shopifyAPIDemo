@@ -16,7 +16,7 @@ enum TableSection:Int{
 //the 'detail' screen of the application, hosting the cotent for a specific custom collection
 class CollectionDetailVC: UITableViewController {
     //a list of products
-    var productItems:[ProductResponse.Product]?
+    var productItems=[ProductResponse.Product]()
     //the collection item specific to this screen
     var collectionItem: MainCollectionResponse.CollectionItem!
     //the collection image
@@ -36,7 +36,11 @@ class CollectionDetailVC: UITableViewController {
                 DispatchQueue.main.async{
                     [weak self] in
                     let indexPath = IndexPath(row: 0, section: 0)
+                    
+                    //use custom data structure to update the data source, then update the tableview
                     self?.tableView.reloadRows(at: [indexPath], with: .automatic)
+                    //experiment with cell animations! grab the cell and do stuff
+                    //let cell = self?.tableView.cellForRow(at: indexPath)
                 }
             }
         }
@@ -59,6 +63,7 @@ class CollectionDetailVC: UITableViewController {
                         DispatchQueue.main.async{
                             [weak self] in
                             let indexSet = IndexSet(integer: 1)
+                            
                             self?.tableView.reloadSections(indexSet, with: .automatic)
                         }
                     }
@@ -66,15 +71,17 @@ class CollectionDetailVC: UITableViewController {
             }
         }
     }
-    //easily the hardest part of this app. We have to make a network request for every single product's picture, and we have to be able to update the table whenever the image has been fetched. This means we must assign the image value to the correct 'product' object in the array, which means the Product data structure cannot be a struct. 
+    //easily the hardest part of this app. We have to make a network request for every single product's picture, and we have to be able to update the table whenever the image has been fetched. This means we must assign the image value to the correct 'product' object in the array 
     func loadProductPictures(){
-        guard let productItems = productItems else { return }
+        //guard let productItems = productItems else { return }
         for (index,product) in productItems.enumerated(){
             if let imageLink = product.images.first?.src, let url = URL(string: imageLink){
                 basicNetworkRequest(url: url){
+                    //weak self not necessary!
                     [weak self] (data) in
-                    
+                    var product = product
                     product.firstImage = data
+                    self?.productItems[index]=product
                     DispatchQueue.main.async{
                         //self?.tableView.reloadData()
                         let indexPath = IndexPath(row: index, section: 1)
@@ -92,12 +99,9 @@ class CollectionDetailVC: UITableViewController {
     }
     //profile section has only 1 row
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return section==TableSection.Profile.rawValue ? 1:(productItems?.count ?? 0)
+        return section==TableSection.Profile.rawValue ? 1:(productItems.count )
     }
-    //define custom height for the profile section
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return indexPath.section==TableSection.Profile.rawValue ? self.view.frame.width:UITableView.automaticDimension
-    }
+
     //estimated height for optimization purposes
     override func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         return indexPath.section==TableSection.Profile.rawValue ? self.view.frame.width:UITableView.automaticDimension
@@ -118,15 +122,13 @@ class CollectionDetailVC: UITableViewController {
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "detail", for: indexPath)
-            if let product = productItems?[indexPath.row]{
-                cell.textLabel?.text = String(product.title)
-                cell.detailTextLabel?.text = String(product.quantity)
-                if let pictureData = product.firstImage{
-                    cell.imageView?.image = UIImage(data:pictureData)
-                }
-            } else {
-                cell.textLabel?.text = "Please wait, retrieving..."
+            let product = productItems[indexPath.row]
+            cell.textLabel?.text = String(product.title)
+            cell.detailTextLabel?.text = String(product.quantity)
+            if let pictureData = product.firstImage{
+                cell.imageView?.image = UIImage(data:pictureData)
             }
+            
             return cell
         }
     }

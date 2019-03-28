@@ -39,21 +39,20 @@ struct SingleCollectionResponse:Codable{
 }
 
 //a list of products each with title,variant,quantity and image
-//Hey Wait a minute....Why is ProductResponse a class you say?!
-//Well...long story short, we want to be able to modify the value of a product object in an array (to set its image data), and if it were a value type, this would not be easy to do. 
-class ProductResponse:Codable{
+
+struct ProductResponse:Codable{
     
     var products:[Product]
     
-    class Product:Codable{
+    struct Product:Codable{
         var title:String
         let variants:[Variant]
-        class Variant:Codable{
+        struct Variant:Codable{
             let inventory_quantity:Int
         }
         var quantity:Int{return self.variants.reduce(0){$0+$1.inventory_quantity}}
         let images:[ImageLink]
-        class ImageLink:Codable{
+        struct ImageLink:Codable{
             let src:String
         }
         var firstImage:Data?

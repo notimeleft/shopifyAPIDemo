@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		86BC6127224D727000E1F1BB /* DetailDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86BC6126224D727000E1F1BB /* DetailDataSource.swift */; };
 		86CD6D152243996500C8E736 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86CD6D142243996500C8E736 /* AppDelegate.swift */; };
 		86CD6D172243996500C8E736 /* CustomCollectionsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86CD6D162243996500C8E736 /* CustomCollectionsVC.swift */; };
 		86CD6D1A2243996500C8E736 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 86CD6D182243996500C8E736 /* Main.storyboard */; };
@@ -20,6 +21,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		86BC6126224D727000E1F1BB /* DetailDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailDataSource.swift; sourceTree = "<group>"; };
 		86CD6D112243996500C8E736 /* shopifyDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = shopifyDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		86CD6D142243996500C8E736 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		86CD6D162243996500C8E736 /* CustomCollectionsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCollectionsVC.swift; sourceTree = "<group>"; };
@@ -70,6 +72,7 @@
 				86CD6D2622449DD900C8E736 /* JSONStructs.swift */,
 				86CD6D2822449EA000C8E736 /* BasicNetworkRequest.swift */,
 				86CD6D2A2245FB9B00C8E736 /* CollectionDetailVC.swift */,
+				86BC6126224D727000E1F1BB /* DetailDataSource.swift */,
 				86CD6D302246703E00C8E736 /* ProfilePictureCell.swift */,
 				86CD6D182243996500C8E736 /* Main.storyboard */,
 				86CD6D1B2243996700C8E736 /* Assets.xcassets */,
@@ -158,6 +161,7 @@
 				86CD6D2922449EA000C8E736 /* BasicNetworkRequest.swift in Sources */,
 				86CD6D33224723BD00C8E736 /* URLHelpers.swift in Sources */,
 				86CD6D2B2245FB9B00C8E736 /* CollectionDetailVC.swift in Sources */,
+				86BC6127224D727000E1F1BB /* DetailDataSource.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -12,34 +12,48 @@ import UIKit
 class CustomCollectionsVC: UITableViewController{
     //class that handles receiving/returning data from a MainCollectionResponse
     class DataSource {
-        var mainCollection:MainCollectionResponse
+        var mainCollection:MainCollectionResponse? {
+            didSet{
+                populateData()
+            }
+        }
         var detailCollectionIndex = 0
         
         var numberOfRowsInSection:Int{
-            return mainCollection.custom_collections.count
+            return mainCollection?.custom_collections.count ?? 1
         }
         
-        var detailCollectionItem:MainCollectionResponse.CollectionItem{
-            return mainCollection.custom_collections[detailCollectionIndex]
+        var detailCollectionItem:MainCollectionResponse.CollectionItem? {
+            return mainCollection?.custom_collections[detailCollectionIndex]
         }
         
         private var tableView:UITableView?
         
-        init(mainCollection:MainCollectionResponse,tableView:UITableView){
-            self.mainCollection = mainCollection
+        init(tableView:UITableView){
             self.tableView = tableView
-            populateData()
+            requestData()
         }
         
+        func getCollectionTitle(inIndex index:Int)->String{
+            return mainCollection?.custom_collections[index].title ?? ""
+        }
+        
+        //gather the list of custom collections and load it into the tableview
+        func requestData(){
+            if let url = MainRequestURL(){
+                basicNetworkRequest(url: url){
+                    [unowned self] (data) in
+                    let results = try JSONDecoder().decode(MainCollectionResponse.self, from: data)
+                    self.mainCollection = results
+                }
+            }
+        }
+        //ask the tableview to reload the data
         private func populateData(){
             DispatchQueue.main.async {
                 [unowned self] in
                 self.tableView?.reloadData()
             }
-        }
-        
-        func getCollectionTitle(inIndex index:Int)->String{
-            return mainCollection.custom_collections[index].title
         }
     }
     
@@ -49,24 +63,16 @@ class CustomCollectionsVC: UITableViewController{
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         navigationItem.title = "Custom Collections"
-        loadCollectionTitles()
+        dataSource = DataSource(tableView: self.tableView)
+        //loadCollectionTitles()
     }
     
-    //gather the list of custom collections and load it into the tableview
-    func loadCollectionTitles(){
-        if let url = MainRequestURL(){
-            basicNetworkRequest(url: url){
-                [unowned self] (data) in
-                let results = try JSONDecoder().decode(MainCollectionResponse.self, from: data)
-                self.dataSource = DataSource(mainCollection: results, tableView: self.tableView)
-            }
-        }
-    }
+    
     //preparation actions before transitioning to collection detail view
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showDetail"{
             let collectionsDetail = segue.destination as! CollectionDetailVC
-            collectionsDetail.collectionItem = dataSource?.detailCollectionItem
+            collectionsDetail.dataSourceDependency = dataSource?.detailCollectionItem
         }
     }
     //tableview delegate method: define number of rows in each section
@@ -90,7 +96,4 @@ class CustomCollectionsVC: UITableViewController{
             performSegue(withIdentifier: "showDetail", sender: self)
         }
     }
-    
-
 }
-
